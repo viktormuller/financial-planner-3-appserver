@@ -1,8 +1,8 @@
 require('dotenv').config();
 
 const APP_PORT = process.env.APP_PORT || 8000;
-const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID || "5fe1f07b354a870014623a67";
-const PLAID_SECRET = process.env.PLAID_SECRET || "0e3e8ef31782123ead56c50a51b9df";
+const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+const PLAID_SECRET = process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || plaid.environments.sandbox;
 
 let ACCESS_TOKEN = null;
