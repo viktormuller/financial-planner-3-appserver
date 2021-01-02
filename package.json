@@ -1,0 +1,19 @@
+{
+  "name": "financial-planner-3-appserver",
+  "version": "0.0.1",
+  "description": "App server for financial-planner-3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viktormuller/financial-planner-3-appserver.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/viktormuller/financial-planner-3-appserver/issues"
+  },
+  "homepage": "https://github.com/viktormuller/financial-planner-3-appserver#readme"
+}
