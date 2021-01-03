@@ -4,6 +4,7 @@ const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 const PLAID_SECRET = process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || plaid.environments.sandbox;
+const CORS_URL = process.env.CORS_URL;
 
 let ACCESS_TOKEN = null;
 let PUBLIC_TOKEN = null;
@@ -15,7 +16,7 @@ const app = express();
 app.use(express.json());
 var cors = require('cors')
 app.use(cors({
-  origin: ["http://local.enoughcalc.com", "http://localhost:3000"]
+  origin: CORS_URL
 }));
 
 const plaid = require('plaid');
@@ -80,5 +81,5 @@ app.get('/api/balances', function (request, response) {
 });
 
 app.listen(APP_PORT, () => {
-  console.log(`server started at http://localhost:${APP_PORT}`);
+  console.log(`server started at ${APP_PORT}`);
 });
