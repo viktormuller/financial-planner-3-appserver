@@ -1,5 +1,7 @@
 require('dotenv').config();
 
+const plaid = require('plaid');
+
 const APP_PORT = process.env.APP_PORT || 8000;
 const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 const PLAID_SECRET = process.env.PLAID_SECRET;
@@ -18,8 +20,6 @@ var cors = require('cors')
 app.use(cors({
   origin: CORS_URL
 }));
-
-const plaid = require('plaid');
 
 const client = new plaid.Client({
   clientID: PLAID_CLIENT_ID,
