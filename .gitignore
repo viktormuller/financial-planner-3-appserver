@@ -16,6 +16,7 @@ publish.bat
 .DS_Store
 .env
 .env.local
+.env.conf.*
 .env.dev
 .env.prod
 .env.test.local
