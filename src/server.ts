@@ -9,20 +9,20 @@ const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
 const PLAID_SECRET = process.env.PLAID_SECRET;
 const PLAID_ENV = process.env.PLAID_ENV || plaid.environments.sandbox;
 
-function getBalanceFromAccount(account:Account):number{
-    const {balances:{current, available}, type} = account;
+function getBalanceFromAccount(account: Account): number {
+    const { balances: { current, available }, type } = account;
     const accType = BankAccountType[type];
-    switch (accType){
-        case BankAccountType.DEPOSITORY:
-            return available;
+    switch (accType) {
+        case BankAccountType.depository:
+            return available ? available : current;
         default:
             return current;
     }
 }
 
-function getCurrencyFromAccount(account:Account):string{
-    const {balances: {iso_currency_code, unofficial_currency_code}} = account;
-    return iso_currency_code?iso_currency_code:unofficial_currency_code;
+function getCurrencyFromAccount(account: Account): string {
+    const { balances: { iso_currency_code, unofficial_currency_code } } = account;
+    return iso_currency_code ? iso_currency_code : unofficial_currency_code;
 }
 
 export class FPServer implements FP_API {
@@ -63,20 +63,25 @@ export class FPServer implements FP_API {
         return tokenResponse.item_id;
     }
     async getBankAccounts(userId: string): Promise<BankAccount[]> {
-      var balancesResponse = await this.client.getBalance(this.accessToken);
-      return balancesResponse.accounts.map((account) => {
-          let subType = BankAccountSubType[account.subtype];
-          let type = BankAccountType[account.type];
-          return {
-              accountId: account.account_id,
-              name: account.name?account.name:account.official_name,
-              type: type,
-              subType: subType,
-              taxType: BANK_ACCOUNT_TAX_TYPE_BY_SUBTYPE.get(subType),
-              balance: getBalanceFromAccount(account),
-              currency: getCurrencyFromAccount(account)
-          }
-      })
+        var balancesResponse = await this.client.getBalance(this.accessToken);
+        return balancesResponse.accounts.map((account) => {
+            var subType;
+            //Hack to support 529 because enum member cannot be number. 
+            if (account.subtype === "529") subType = BankAccountSubType._529;
+            else subType = BankAccountSubType[account.subtype];
+            let type = BankAccountType[account.type];
+            let taxType = BANK_ACCOUNT_TAX_TYPE_BY_SUBTYPE.get(subType);            
+
+            return {
+                accountId: account.account_id,
+                name: account.name ? account.name : account.official_name,
+                type: type,
+                subType: subType,
+                taxType: taxType,
+                balance: getBalanceFromAccount(account),
+                currency: getCurrencyFromAccount(account)
+            }
+        })
     }
 
 }
