@@ -50,6 +50,15 @@ app.get('/api/BankAccounts', function (request, response, next) {
   });
 });
 
+app.get('/api/Holdings', function (request, response, next) {
+  server.getHoldings().then((holdings) => {
+    response.send({ holdings: holdings });
+  }).catch(e => {
+    console.log(e);
+    next(e);
+  });
+});
+
 app.listen(APP_PORT, () => {
   console.log(`server started at ${APP_PORT}`);
 });
