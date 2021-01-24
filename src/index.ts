@@ -99,6 +99,15 @@ app.get('/api/Holdings', function (request, response, next) {
   });
 });
 
+app.get('/api/CashFlowAccounts', function (request, response, next){
+  server.getCashFlowAccounts(request.user.sub).then((cfAccs) => {
+    response.send({ accounts: cfAccs });
+  }).catch(e => {
+    console.log(e);
+    next(e);
+  });
+});
+
 app.listen(APP_PORT, () => {
   console.log(`server started at ${APP_PORT}`);
 });
