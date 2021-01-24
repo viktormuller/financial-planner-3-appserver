@@ -1,4 +1,4 @@
-import { BankAccount, BankAccountType, BankAccountSubType, FP_API, BANK_ACCOUNT_TAX_TYPE_BY_SUBTYPE, BankAccountTaxType, FinancialAccount, NET_CASH_IN_FLOW_ACCOUNT_TYPE, NET_CASH_OUT_FLOW_ACCOUNT_TYPE } from "financial-planner-api";
+import { BankAccount, BankAccountType, BankAccountSubType, FP_API, BANK_ACCOUNT_TAX_TYPE_BY_SUBTYPE, BankAccountTaxType, FinancialAccount, NET_CASH_IN_FLOW_ACCOUNT_TYPE, NET_CASH_OUT_FLOW_ACCOUNT_TYPE, MORTGAGE_PAYMENT_ACCOUNT_TYPE } from "financial-planner-api";
 import { Holding, SecurityType } from "financial-planner-api/build/Holding";
 import { MonetaryAmount } from "financial-planner-api/build/MonetaryAmount";
 import { Client, Account, Security, Transaction } from "plaid";
@@ -64,9 +64,10 @@ export class FPServer implements FP_API {
         endOfLastMonth.setDate(1);
         endOfLastMonth.setHours(-1);
         const endDate: string = formatDate(endOfLastMonth);
-        let startOfLastMonth = new Date(endOfLastMonth);
-        startOfLastMonth.setDate(1);
-        const startDate: string = formatDate(startOfLastMonth);
+        let startOf12MonthAgo = new Date(endOfLastMonth);
+        startOf12MonthAgo.setMonth(endOfLastMonth.getMonth()-11);
+        startOf12MonthAgo.setDate(1);
+        const startDate: string = formatDate(startOf12MonthAgo);
         let morePages = false;
         let offset = 0;
         let accessToken = plaidTokenStore.get(userId);
@@ -84,8 +85,9 @@ export class FPServer implements FP_API {
             allTransactions.push(...transactions);
         } while (morePages);
 
-        const inFlow = new FinancialAccount(NET_CASH_IN_FLOW_ACCOUNT_TYPE, startOfLastMonth.getFullYear());
-        const outFlow = new FinancialAccount(NET_CASH_OUT_FLOW_ACCOUNT_TYPE, startOfLastMonth.getFullYear());
+        const inFlow = new FinancialAccount(NET_CASH_IN_FLOW_ACCOUNT_TYPE, startOf12MonthAgo.getFullYear());
+        const outFlow = new FinancialAccount(NET_CASH_OUT_FLOW_ACCOUNT_TYPE, startOf12MonthAgo.getFullYear());
+        const mortgage = new FinancialAccount(MORTGAGE_PAYMENT_ACCOUNT_TYPE, startOf12MonthAgo.getFullYear());
 
         allTransactions.forEach((value) => {
             let date = Number.parseInt((value.date?value.date:value.authorized_date)?.split("-")[0]);
@@ -93,10 +95,17 @@ export class FPServer implements FP_API {
             if (value.amount < 0) {
                 inFlow.add(new MonetaryAmount(-value.amount), date);
             } else {
-                outFlow.add(new MonetaryAmount(value.amount), date);
+                outFlow.add(new MonetaryAmount(value.amount), date);                
+                if (value.category_id === "18020004") // Mortgage
+                    mortgage.add(new MonetaryAmount(value.amount), date);
             }
         });
-        return [inFlow,outFlow];
+
+        let ret:FinancialAccount[] = [];
+        if (inFlow.balances.length > 0 )ret.push(inFlow);
+        if (outFlow.balances.length > 0 )ret.push(outFlow);
+        if (mortgage.balances.length > 0 )ret.push(mortgage);
+        return ret;
     }
 
 
