@@ -70,9 +70,8 @@ export class FPServer implements FP_API {
         const startDate: string = formatDate(startOf12MonthAgo);
         let morePages = false;
         let offset = 0;
-        let accessToken = plaidTokenStore.get(userId);
-        console.log("user ID: " + userId);
-        console.log("accessToken: " + accessToken);
+        let accessToken = plaidTokenStore.get(userId);        
+                
         do {
             const txResponse = await this.client.
                 getTransactions(accessToken, startDate, endDate, { 
